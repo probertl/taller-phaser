@@ -47,58 +47,48 @@ function preload ()
 {
     this.load.image("sky", "assets/background.png");
     this.load.image("ground", "assets/floor-2.png");
-    this.load.image("beer", "assets/beer.png");
     this.load.image("bomb", "assets/bomb.png");
+    this.load.spritesheet("beer", "assets/cerveza.png", { frameWidth: 254, frameHeight: 277 });
     this.load.spritesheet("girl", "assets/walk.png", { frameWidth: 45, frameHeight: 58 });
 }
 
 function create ()
 {
-    //  A simple background for our game
     this.add.image(400, 300, 'sky');
 
-    //  The platforms group contains the ground and the 2 ledges we can jump on
     platforms = this.physics.add.staticGroup();
 
-    //  Here we create the ground.
-    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
     platforms.create(400, 568, 'ground').setScale(2).refreshBody();
-
-    //  Now let's create some ledges
     platforms.create(600, 400, 'ground');
     platforms.create(50, 250, 'ground');
     platforms.create(750, 220, 'ground');
 
-    // The player and its settings
     player = this.physics.add.sprite(100, 450, 'girl');
-
-    //  Player physics properties. Give the little guy a slight bounce.
     player.setBounce(0.2);
     player.setCollideWorldBounds(true);
 
-    //  Our player animations, turning, walking left and walking right.
     this.anims.create({
         key: "walk",
-        frames: this.anims.generateFrameNumbers("girl", {
-            start: 0,
-            end: 23,
-        }), // todos los frames
-        frameRate: 10, // Velocitat de l'animació (frames per segon)
-        repeat: -1, // -1 significa bucle infinit
+        frames: this.anims.generateFrameNumbers("girl", { start: 0, end: 23 }),
+        frameRate: 10,
+        repeat: -1
     });
 
-        /* Animació de quiet: un sol frame (el 30) sense bucle */
     this.anims.create({
         key: "turn",
         frames: [{ key: "girl", frame: 20 }],
-        frameRate: 20,
+        frameRate: 20
     });
 
+    this.anims.create({
+        key: 'beer',
+        frames: this.anims.generateFrameNumbers('beer', { start: 0, end: 4 }),
+        frameRate: 1,
+        repeat: -1
+    });
 
-    //  Input Events
     cursors = this.input.keyboard.createCursorKeys();
 
-    //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
     beers = this.physics.add.group({
         key: 'beer',
         repeat: 11,
@@ -106,52 +96,42 @@ function create ()
     });
 
     beers.children.iterate(function (child) {
-
-        //  Give each star a slightly different bounce
         child.setBounceY(Phaser.Math.FloatBetween(0.2, 0.6));
-
+        child.anims.play('beer', true);
+        child.setScale(0.15); // ← cervesa petita
     });
 
     bombs = this.physics.add.group();
 
-    //  The score
     scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
 
-    //  Collide the player and the stars with the platforms
     this.physics.add.collider(player, platforms);
     this.physics.add.collider(beers, platforms);
     this.physics.add.collider(bombs, platforms);
 
-    //  Checks to see if the player overlaps with any of the beers, if he does call the collectStar function
     this.physics.add.overlap(player, beers, collectBeer, null, this);
-
     this.physics.add.collider(player, bombs, hitBomb, null, this);
 }
 
 function update ()
 {
-    if (gameOver)
+    if (gameOver) { return; }
+
+    if (cursors.left.isDown)
     {
-        return;
-    }
-
-    if (cursors.left.isDown) {
-
         player.setVelocityX(-160);
-        player.setFlipX(false); // direccio original
+        player.setFlipX(false);
         player.anims.play("walk", true);
-
-    } else if (cursors.right.isDown) {
-
+    }
+    else if (cursors.right.isDown)
+    {
         player.setVelocityX(160);
-        player.setFlipX(true); // invertim el sprite
+        player.setFlipX(true);
         player.anims.play("walk", true);
-
     }
     else
     {
         player.setVelocityX(0);
-
         player.anims.play('turn');
     }
 
@@ -165,17 +145,15 @@ function collectBeer (player, beer)
 {
     beer.disableBody(true, true);
 
-    //  Add and update the score
     score += 10;
     scoreText.setText('Score: ' + score);
 
     if (beers.countActive(true) === 0)
     {
-        //  A new batch of beers to collect
         beers.children.iterate(function (child) {
-
             child.enableBody(true, child.x, 0, true, true);
-
+            child.anims.play('beer', true);
+            child.setScale(0.15); // ← cervesa petita quan reapareix
         });
 
         var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
@@ -185,18 +163,14 @@ function collectBeer (player, beer)
         bomb.setCollideWorldBounds(true);
         bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
         bomb.allowGravity = false;
-
     }
 }
 
 function hitBomb (player, bomb)
 {
     this.physics.pause();
-
     player.setTint(0xff0000);
-
     player.anims.play('turn');
-
     gameOver = true;
 }
 
