@@ -1,0 +1,231 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Making your first Phaser 3 Game - Part 10</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body { margin: 0; }
+    </style>
+</head>
+<body>
+<script type="text/javascript">
+
+var config = {
+    type: Phaser.AUTO,
+    width: 900,
+    height: 640,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },
+            debug: false
+        }
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+var player;
+var beers;
+var bombs;
+var layer1;
+var layer2;
+var cursors;
+var score = 0;
+var gameOver = false;
+var scoreText;
+var music;
+var isMuted = false;
+var sKey;
+
+// Mida del mapa: 60 tiles × 16px = 960 ample, 40 tiles × 16px = 640 alt
+var MAP_WIDTH  = 960;
+var MAP_HEIGHT = 640;
+
+var game = new Phaser.Game(config);
+
+function preload ()
+{   
+    this.load.image('sky', 'assets/background.png');
+    this.load.image('bomb', 'assets/bomb.png');
+    this.load.spritesheet('beer', 'assets/cerveza.png', { frameWidth: 254, frameHeight: 277 });
+    this.load.spritesheet('girl', 'assets/walk.png', { frameWidth: 45, frameHeight: 58 });
+    this.load.audio('dead', 'assets/dead.mp3');
+    this.load.audio('music', 'assets/music.mp3');
+
+    this.load.tilemapTiledJSON('mapa', 'assets/mapa-bueno.json');
+    this.load.image('tiles', 'assets/Fantasy Swamp Forest/Free/Terrain_and_Props.png');
+}
+
+function create ()
+{
+    // let bg = this.add.image(400, 300, 'sky'); // centro del canvas
+    let bg = this.add.image(0, 0, 'sky')
+    .setOrigin(0, 0)
+    .setDisplaySize(MAP_WIDTH, MAP_HEIGHT) // ← estira la imatge al mapa sencer
+    .setScrollFactor(0.2); // parallax suau
+
+    // Mapa
+    var map = this.make.tilemap({ key: 'mapa' });
+    var tileset = map.addTilesetImage('16', 'tiles');
+
+    // Capa 2 — decorativa, SENSE col·lisió (es pinta primer, queda al fons)
+    layer2 = map.createLayer('Tile Layer 2', tileset, 0, 0);
+
+    // Capa 1 — amb col·lisió
+    layer1 = map.createLayer('Tile Layer 1', tileset, 0, 0);
+    layer1.setCollisionByExclusion([-1, 0]);
+
+    // Límits del món físic
+    this.physics.world.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT);
+
+    // Jugador
+    player = this.physics.add.sprite(150, 400, 'girl');
+    player.setBounce(0.2);
+    player.setCollideWorldBounds(true);
+
+    // Càmera que segueix el jugador
+    this.cameras.main.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT);
+    this.cameras.main.startFollow(player, true, 0.1, 0.1);
+
+    // Animacions jugador
+    this.anims.create({
+        key: 'walk',
+        frames: this.anims.generateFrameNumbers('girl', { start: 0, end: 23 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'turn',
+        frames: [{ key: 'girl', frame: 20 }],
+        frameRate: 20
+    });
+
+    // Animació cervesa
+    this.anims.create({
+        key: 'beerAnim',
+        frames: this.anims.generateFrameNumbers('beer', { start: 0, end: 4 }),
+        frameRate: 8,
+        repeat: -1
+    });
+
+    // Tecles
+    cursors = this.input.keyboard.createCursorKeys();
+    sKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+
+    // Cerveses
+    beers = this.physics.add.group({
+        key: 'beer',
+        repeat: 11,
+        setXY: { x: 12, y: 0, stepX: 70 }
+    });
+
+    beers.children.iterate(function (child) {
+        child.setBounceY(Phaser.Math.FloatBetween(0.2, 0.6));
+        child.anims.play('beerAnim', true);
+        child.setScale(0.15);
+    });
+
+    // Bombes
+    bombs = this.physics.add.group();
+
+    // Marcador — fixe a la càmera perquè sempre es vegi
+    scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#fff' });
+    scoreText.setScrollFactor(0); // ← no es mou amb la càmera
+
+    // Col·lisions (només amb layer1)
+    this.physics.add.collider(player, layer1);
+    this.physics.add.collider(beers, layer1);
+    this.physics.add.collider(bombs, layer1);
+
+    this.physics.add.overlap(player, beers, collectBeer, null, this);
+    this.physics.add.collider(player, bombs, hitBomb, null, this);
+
+    // Música
+    music = this.sound.add('music', { volume: 0.5, loop: true });
+    this.input.once('pointerdown', function () {
+        music.play();
+    });
+}
+
+function update ()
+{
+    if (gameOver) { return; }
+
+    if (Phaser.Input.Keyboard.JustDown(sKey))
+    {
+        if (isMuted) {
+            music.resume();
+            isMuted = false;
+        } else {
+            music.pause();
+            isMuted = true;
+        }
+    }
+
+    if (cursors.left.isDown)
+    {
+        player.setVelocityX(-160);
+        player.setFlipX(false);
+        player.anims.play('walk', true);
+    }
+    else if (cursors.right.isDown)
+    {
+        player.setVelocityX(160);
+        player.setFlipX(true);
+        player.anims.play('walk', true);
+    }
+    else
+    {
+        player.setVelocityX(0);
+        player.anims.play('turn');
+    }
+
+    if (cursors.up.isDown && player.body.blocked.down)
+    {
+        player.setVelocityY(-330);
+    }
+}
+
+function collectBeer (player, beer)
+{
+    beer.disableBody(true, true);
+
+    score += 10;
+    scoreText.setText('Score: ' + score);
+
+    if (beers.countActive(true) === 0)
+    {
+        beers.children.iterate(function (child) {
+            child.enableBody(true, child.x, 0, true, true);
+            child.anims.play('beerAnim', true);
+            child.setScale(0.15);
+        });
+
+        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+        var bomb = bombs.create(x, 16, 'bomb');
+        bomb.setBounce(1);
+        bomb.setCollideWorldBounds(true);
+        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        bomb.allowGravity = false;
+    }
+}
+
+function hitBomb (player, bomb)
+{
+    this.physics.pause();
+    music.stop();
+    this.sound.play('dead');
+    player.setTint(0xff0000);
+    player.anims.play('turn');
+    gameOver = true;
+}
+
+</script>
+</body>
+</html>

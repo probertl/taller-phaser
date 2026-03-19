@@ -1,0 +1,131 @@
+{
+    "activeFile": "mapa-bueno.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
+        "16.tsx": {
+            "scaleInDock": 2,
+            "scaleInEditor": 1
+        },
+        "Cortado.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "Terrain_and_Props.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "aa": {
+            "scale": 2,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 175.5,
+                "y": 171
+            }
+        },
+        "aa#Cortado": {
+            "scaleInDock": 1
+        },
+        "aaa.tsx": {
+            "scaleInDock": 2,
+            "scaleInEditor": 1
+        },
+        "assets/mapa-bueno": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 457,
+                "y": 221
+            }
+        },
+        "assets/mapa-bueno#16": {
+            "scaleInDock": 1
+        },
+        "assets/mapa.json": {
+            "scale": 0.7253645833333333,
+            "selectedLayer": 4,
+            "viewCenter": {
+                "x": 480.4480505492928,
+                "y": 512.8455518058448
+            }
+        },
+        "assets/mapa.json#aaa": {
+            "scaleInDock": 1
+        },
+        "assets/mapa1.json": {
+            "scale": 0.7253645833333333,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 480.4480505492928,
+                "y": 505.9524664321104
+            }
+        },
+        "assets/mapa1.json#aaa": {
+            "scaleInDock": 1
+        },
+        "mapa-bueno.json": {
+            "scale": 0.9974999999999999,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 358.89724310776955,
+                "y": 250.62656641604013
+            }
+        },
+        "mapa-bueno.json#16": {
+            "scaleInDock": 1
+        },
+        "mapa-bueno.tmx": {
+            "scale": 0.9974999999999999,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 461.1528822055139,
+                "y": 250.62656641604013
+            }
+        },
+        "mapa1.json": {
+            "scale": 0.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 385,
+                "y": 302
+            }
+        },
+        "mapa1.json#aaa": {
+            "scaleInDock": 1
+        }
+    },
+    "last.imagePath": "/home/probertl/taller-phaser/phaser/assets/Fantasy Swamp Forest/Free",
+    "map.height": 20,
+    "map.lastUsedFormat": "json",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 30,
+    "openFiles": [
+        "16.tsx",
+        "mapa-bueno.tmx"
+    ],
+    "project": "untitled.tiled-project",
+    "recentFiles": [
+        "mapa-bueno.json",
+        "16.tsx",
+        "mapa-bueno.tmx",
+        "Terrain_and_Props.tsx",
+        "assets/mapa-bueno",
+        "aaa.tsx",
+        "assets/mapa1.json",
+        "assets/mapa.json",
+        "aa",
+        "mapa1.json",
+        "Cortado.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
