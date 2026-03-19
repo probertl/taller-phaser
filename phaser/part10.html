@@ -53,6 +53,7 @@ function preload ()
     this.load.image("bomb", "assets/bomb.png");
     this.load.spritesheet("beer", "assets/cerveza.png", { frameWidth: 254, frameHeight: 277 });
     this.load.spritesheet("girl", "assets/walk.png", { frameWidth: 45, frameHeight: 58 });
+    this.load.audio('dead', 'assets/dead.mp3');
     this.load.audio('music', 'assets/music.mp3');
 }
 
@@ -197,6 +198,7 @@ function hitBomb (player, bomb)
     music.stop();
     player.setTint(0xff0000);
     player.anims.play('turn');
+    this.sound.play('dead');
     gameOver = true;
 }
 
